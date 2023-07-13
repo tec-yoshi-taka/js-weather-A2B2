@@ -30,6 +30,73 @@
     <!-- Javascriptの記述 -->
     <script>
         "use strict";
+        const h1 = document.querySelector('h1');
+        const weather_icon = document.querySelector('.weather_icon');
+        const current_temp = document.querySelector('.current_temp');
+        const current_date = document.querySelector('.current_date');
+        const forecast = document.querySelector('.forecast');
+        const api = '';
+        const city = 'osaka';
+        const current_url = `https://api.openweathermap.org/data/2.5/weather?q=${city},jp&units=metric&APPID=${api}&lang=ja`;
+        const forecast_url = `https://api.openweathermap.org/data/2.5/forecast?q=${city},jp&units=metric&APPID=${api}&lang=ja`;
+
+        const now = new Date();
+        let hour = now.getHours();
+        let min = now.getMinutes();
+        let month = now.getMonth() + 1;
+        let date = now.getDate();
+        let day = now.getDay();
+        const dayName = ['日', '月', '火', '水', '木', '金', '土'];
+        const addZero = (num) => {
+            num = num < 10 ? `0${num}` : num;
+            return num;
+        }
+        const dateFormat = (d) => {
+            const day = [];
+            const date = new Date(d);
+            date.setHours(date.getHours()+9);
+            day[0] = `${date.getMonth()+1}月${date.getDate()}日(${dayName[date.getDay()]})`;
+            day[1] = `${addZero(date.getHours())}:${addZero(date.getMinutes())}`;
+            return day;
+        }
+        fetch(current_url)
+            .then(res => {
+                return res.json();
+            })
+            .then(data => {
+                console.log(data);
+                console.log(data.name);
+                h1.innerHTML = `${data.name}の天気予報`;
+                weather_icon.innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">`;
+                current_temp.innerHTML = `${Math.round(data.main.temp)}℃`;
+                current_date.innerHTML = `${month}月${date}日(${dayName[day]}) ${addZero(hour)}:${addZero(min)}`;
+            });
+        fetch(forecast_url)
+            .then(res => {
+                return res.json();
+            })
+            .then(data => {
+                console.log('-----天気予報-----');
+                console.log(data);
+                console.log(data.list[0]);
+                //天気アイコンをとる
+                console.log(data.list[0].weather[0].icon);
+                //気温をとる
+                console.log(data.list[0].main.temp);
+                //天気情報
+                console.log(data.list[0].weather[0].description);
+                //日付
+                console.log(data.list[0].dt_txt);
+
+                // const date = new Date(data.list[38].dt_txt);
+                console.log(data.list[38].dt_txt);
+                console.log(dateFormat(data.list[38].dt_txt));
+
+
+                let html = '';
+                html = `<div class="weather-item"><div class="weather-time">${data.list[0].dt_txt}</div><img src="http://openweathermap.org/img/wn/${data.list[0].weather[0].icon}.png"><div class="weather-text">${data.list[0].weather[0].description}</div><div class="weather-temp">${data.list[0].main.temp}℃</div></div>`;
+                forecast.innerHTML = html;
+            });
 
     </script>
 </body>
