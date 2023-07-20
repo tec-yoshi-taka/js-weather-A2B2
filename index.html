@@ -14,6 +14,17 @@
 
 <body>
     <div class="wrapper">
+        <div class="selectbox">
+            <select name="地域" id="select_box">
+                <option value="tokyo">東京</option>
+                <option value="hokkaido">北海道</option>
+                <option value="fukuoka">福岡</option>
+                <option value="okinawa">沖縄</option>
+                <option value="New York,US">ニューヨーク</option>
+                <option value="Honolulu,US">ホノルル</option>
+                <option value="City of London,GS">ロンドン</option>
+            </select>
+        </div>
         <!-- 現在の天気の表示 -->
         <div class="current">
             <div class="city_name">
@@ -30,13 +41,14 @@
     <!-- Javascriptの記述 -->
     <script>
         "use strict";
+        const body = document.querySelector('body');
         const h1 = document.querySelector('h1');
         const weather_icon = document.querySelector('.weather_icon');
         const current_temp = document.querySelector('.current_temp');
         const current_date = document.querySelector('.current_date');
         const forecast = document.querySelector('.forecast');
-        const api = '';
-        const city = 'osaka';
+        const api = '5e030478e6d164977e9b5deaf8b5bec4';
+        const city = 'tokyo';
         const current_url = `https://api.openweathermap.org/data/2.5/weather?q=${city},jp&units=metric&APPID=${api}&lang=ja`;
         const forecast_url = `https://api.openweathermap.org/data/2.5/forecast?q=${city},jp&units=metric&APPID=${api}&lang=ja`;
 
@@ -46,6 +58,8 @@
         let month = now.getMonth() + 1;
         let date = now.getDate();
         let day = now.getDay();
+        let oldDate = '';
+        let newDate = '';
         const dayName = ['日', '月', '火', '水', '木', '金', '土'];
         const addZero = (num) => {
             num = num < 10 ? `0${num}` : num;
@@ -54,9 +68,14 @@
         const dateFormat = (d) => {
             const day = [];
             const date = new Date(d);
-            date.setHours(date.getHours()+9);
-            day[0] = `${date.getMonth()+1}月${date.getDate()}日(${dayName[date.getDay()]})`;
+            date.setHours(date.getHours() + 9);
+            day[0] = `${date.getMonth() + 1}月${date.getDate()}日(${dayName[date.getDay()]})`;
             day[1] = `${addZero(date.getHours())}:${addZero(date.getMinutes())}`;
+            newDate = day[0];
+            if(oldDate === newDate){
+                day[0] = ''
+            }
+            oldDate = newDate;
             return day;
         }
         fetch(current_url)
@@ -70,7 +89,14 @@
                 weather_icon.innerHTML = `<img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">`;
                 current_temp.innerHTML = `${Math.round(data.main.temp)}℃`;
                 current_date.innerHTML = `${month}月${date}日(${dayName[day]}) ${addZero(hour)}:${addZero(min)}`;
+                if(Math.round(data.main.temp) < 30){
+                    body.style.backgroundImage = "linear-gradient(90deg, rgba(133,176,255,1) 0%, rgba(0,90,255,1) 100%)";
+                }else{
+                    body.style.backgroundImage = "linear-gradient(141deg, rgba(255,171,144,1) 0%, rgba(255,89,36,1) 100%)";
+                }
             });
+        
+        
         fetch(forecast_url)
             .then(res => {
                 return res.json();
@@ -91,10 +117,19 @@
                 // const date = new Date(data.list[38].dt_txt);
                 console.log(data.list[38].dt_txt);
                 console.log(dateFormat(data.list[38].dt_txt));
-
-
                 let html = '';
-                html = `<div class="weather-item"><div class="weather-time">${data.list[0].dt_txt}</div><img src="http://openweathermap.org/img/wn/${data.list[0].weather[0].icon}.png"><div class="weather-text">${data.list[0].weather[0].description}</div><div class="weather-temp">${data.list[0].main.temp}℃</div></div>`;
+                for (let i = 0; i < 40; i++) {
+                    const day = dateFormat(data.list[i].dt_txt);
+                    if(day[0] != ''){
+                        if(html != ''){
+                            html += '</div>';
+                        }
+                        html += `<div class="weather-report"><div class="weather-date">${day[0]}</div></div>`;
+                        html += '<div class="weather-wrap">';
+                    }                
+
+                    html += `<div class="weather-item"><div class="weather-time">${day[1]}</div><img src="http://openweathermap.org/img/wn/${data.list[i].weather[0].icon}.png"><div class="weather-text">${data.list[i].weather[0].description}</div><div class="weather-temp">${data.list[i].main.temp}℃</div></div>`;
+                }
                 forecast.innerHTML = html;
             });
 

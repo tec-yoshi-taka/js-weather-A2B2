@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-    font-size: 10px;
+    font-size: 24px;
     text-align: center;
     font-weight: bold;
 
@@ -129,7 +129,7 @@ select{
         margin-bottom: 20px;
     }
     .graph-area, .forecast{
-        display: none;
+        /* display: none; */
     }
     .selectbox {
         width:80%;
